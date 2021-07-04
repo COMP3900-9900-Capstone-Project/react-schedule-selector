@@ -140,7 +140,7 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
 
     // As long as the user isn't in the process of selecting, allow prop changes to re-populate selection state
     if (state.selectionStart == null) {
-      const selections: Array<[Date, number]> = props.selection.map((date) => [date, currentPreference]);
+      const selections: Array<[Date, number]> = props.selection as unknown as Array<[Date, number]>;
 
       return {
         selectionDraft: selections,
