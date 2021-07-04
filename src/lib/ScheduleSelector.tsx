@@ -69,7 +69,7 @@ const TimeText = styled(Text)`
 type PropsType = {
   selection: Array<Date>
   selectionScheme: SelectionSchemeType
-  onChange: (newSelection: Array<Date>) => void
+  onChange: (newSelection: Array<[Date, number]>) => void
   startDate: Date
   numDays: number
   minTime: number
@@ -82,15 +82,19 @@ type PropsType = {
   unselectedColor: string
   selectedColor: string
   hoveredColor: string
+  prefMappings: {
+    [key: number]: string
+  }
   renderDateCell?: (datetime: Date, selected: boolean, refSetter: (dateCellElement: HTMLElement) => void) => JSX.Element
   renderTimeLabel?: (time: Date) => JSX.Element
   renderDateLabel?: (date: Date) => JSX.Element
+  currentPreference: () => number
 }
 
 type StateType = {
   // In the case that a user is drag-selecting, we don't want to call this.props.onChange() until they have completed
   // the drag-select. selectionDraft serves as a temporary copy during drag-selects.
-  selectionDraft: Array<Date>
+  selectionDraft: Array<[date: Date, pref: number]>
   selectionType: SelectionType | null
   selectionStart: Date | null
   isTouchDragging: boolean
@@ -132,10 +136,14 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
   }
 
   static getDerivedStateFromProps(props: PropsType, state: StateType): Partial<StateType> | null {
+    const currentPreference = props.currentPreference();
+
     // As long as the user isn't in the process of selecting, allow prop changes to re-populate selection state
     if (state.selectionStart == null) {
+      const selections: Array<[Date, number]> = props.selection.map((date) => [date, currentPreference]);
+
       return {
-        selectionDraft: [...props.selection],
+        selectionDraft: [...selections],
         dates: ScheduleSelector.computeDatesMatrix(props)
       }
     }
@@ -161,8 +169,12 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
   constructor(props: PropsType) {
     super(props)
 
+    const currentPreference = props.currentPreference();
+
+    const selections: Array<[Date, number]> = this.props.selection.map((date) => [date, currentPreference]);
+
     this.state = {
-      selectionDraft: [...this.props.selection], // copy it over
+      selectionDraft: [...selections], // copy it over
       selectionType: null,
       selectionStart: null,
       isTouchDragging: false,
@@ -255,7 +267,11 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
       nextDraft = nextDraft.filter(a => !newSelection.find(b => isSameMinute(a, b)))
     }
 
-    this.setState({ selectionDraft: nextDraft }, callback)
+    const currentPreference = this.props.currentPreference();
+
+    const selections: Array<[Date, number]> = nextDraft.map((date) => [date, currentPreference]);
+
+    this.setState({ selectionDraft: selections }, callback)
   }
 
   // Isomorphic (mouse and touch) handler since starting a selection works the same way for both classes of user input
@@ -308,7 +324,10 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
       this.handleSelectionStartEvent(time)
     }
 
-    const selected = Boolean(this.state.selectionDraft.find(a => isSameMinute(a, time)))
+    const selection = this.state.selectionDraft.find(([a, _pref]) => isSameMinute(a, time));
+
+    const selected = Boolean(selection);
+    const pref = selection ? selection[1] : 0;
 
     return (
       <GridCell
@@ -331,12 +350,12 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
         onTouchMove={this.handleTouchMoveEvent}
         onTouchEnd={this.handleTouchEndEvent}
       >
-        {this.renderDateCell(time, selected)}
+        {this.renderDateCell(time, selected, pref)}
       </GridCell>
     )
   }
 
-  renderDateCell = (time: Date, selected: boolean): JSX.Element => {
+  renderDateCell = (time: Date, selected: boolean, pref: number): JSX.Element => {
     const refSetter = (dateCell: HTMLElement | null) => {
       if (dateCell) {
         this.cellToDate.set(dateCell, time)
@@ -349,7 +368,7 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
         <DateCell
           selected={selected}
           ref={refSetter}
-          selectedColor={this.props.selectedColor}
+          selectedColor={this.props.prefMappings[pref]}
           unselectedColor={this.props.unselectedColor}
           hoveredColor={this.props.hoveredColor}
         />
