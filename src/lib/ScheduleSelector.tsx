@@ -143,7 +143,7 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
       const selections: Array<[Date, number]> = props.selection.map((date) => [date, currentPreference]);
 
       return {
-        selectionDraft: [...selections],
+        selectionDraft: selections,
         dates: ScheduleSelector.computeDatesMatrix(props)
       }
     }
@@ -174,7 +174,7 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
     const selections: Array<[Date, number]> = this.props.selection.map((date) => [date, currentPreference]);
 
     this.state = {
-      selectionDraft: [...selections], // copy it over
+      selectionDraft: selections, // copy it over
       selectionType: null,
       selectionStart: null,
       isTouchDragging: false,
