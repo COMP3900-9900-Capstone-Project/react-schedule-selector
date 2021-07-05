@@ -2,9 +2,9 @@ import * as React from 'react';
 import { SelectionSchemeType, SelectionType } from './selection-schemes';
 export declare const GridCell: import("styled-components").StyledComponent<"div", any, {}, never>;
 declare type PropsType = {
-    selection: Array<Date>;
+    selection: Array<[Date, number]>;
     selectionScheme: SelectionSchemeType;
-    onChange: (newSelection: Array<Date>) => void;
+    onChange: (newSelection: Array<[Date, number]>) => void;
     startDate: Date;
     numDays: number;
     minTime: number;
@@ -17,12 +17,16 @@ declare type PropsType = {
     unselectedColor: string;
     selectedColor: string;
     hoveredColor: string;
+    prefMappings: {
+        [key: number]: string;
+    };
     renderDateCell?: (datetime: Date, selected: boolean, refSetter: (dateCellElement: HTMLElement) => void) => JSX.Element;
     renderTimeLabel?: (time: Date) => JSX.Element;
     renderDateLabel?: (date: Date) => JSX.Element;
+    currentPreference: () => number;
 };
 declare type StateType = {
-    selectionDraft: Array<Date>;
+    selectionDraft: Array<[date: Date, pref: number]>;
     selectionType: SelectionType | null;
     selectionStart: Date | null;
     isTouchDragging: boolean;
@@ -50,7 +54,7 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
     handleTouchMoveEvent(event: React.TouchEvent): void;
     handleTouchEndEvent(): void;
     renderDateCellWrapper: (time: Date) => JSX.Element;
-    renderDateCell: (time: Date, selected: boolean) => JSX.Element;
+    renderDateCell: (time: Date, selected: boolean, pref: number) => JSX.Element;
     renderTimeLabel: (time: Date) => JSX.Element;
     renderDateLabel: (date: Date) => JSX.Element;
     renderFullDateGrid(): Array<JSX.Element>;

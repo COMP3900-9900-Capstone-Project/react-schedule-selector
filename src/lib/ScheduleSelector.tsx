@@ -67,7 +67,7 @@ const TimeText = styled(Text)`
 `
 
 type PropsType = {
-  selection: Array<Date>
+  selection: Array<[Date, number]>
   selectionScheme: SelectionSchemeType
   onChange: (newSelection: Array<[Date, number]>) => void
   startDate: Date
@@ -169,12 +169,8 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
   constructor(props: PropsType) {
     super(props)
 
-    const currentPreference = props.currentPreference();
-
-    const selections: Array<[Date, number]> = this.props.selection.map((date) => [date, currentPreference]);
-
     this.state = {
-      selectionDraft: selections, // copy it over
+      selectionDraft: this.props.selection, // copy it over
       selectionType: null,
       selectionStart: null,
       isTouchDragging: false,
@@ -260,25 +256,24 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
       )
     }
 
-    let nextDraft = [...this.props.selection]
-    if (selectionType === 'add') {
-      nextDraft = Array.from(new Set([...nextDraft, ...newSelection]))
-    } else if (selectionType === 'remove') {
-      nextDraft = nextDraft.filter(a => !newSelection.find(b => isSameMinute(a, b)))
-    }
-
     const currentPreference = this.props.currentPreference();
 
-    const selections: Array<[Date, number]> = nextDraft.map((date) => [date, currentPreference]);
+    let nextDraft = [...this.props.selection]
+    if (selectionType === 'add') {
+      const newSelections: [Date, number][] = newSelection.map((date) => [date, currentPreference]);
+      nextDraft = Array.from(new Set([...nextDraft, ...newSelections]));
+    } else if (selectionType === 'remove') {
+      nextDraft = nextDraft.filter(([a, _pref]) => !newSelection.find(b => isSameMinute(a, b)))
+    }
 
-    this.setState({ selectionDraft: selections }, callback)
+    this.setState({ selectionDraft: nextDraft }, callback)
   }
 
   // Isomorphic (mouse and touch) handler since starting a selection works the same way for both classes of user input
   handleSelectionStartEvent(startTime: Date) {
     // Check if the startTime cell is selected/unselected to determine if this drag-select should
     // add values or remove values
-    const timeSelected = this.props.selection.find(a => isSameMinute(a, startTime))
+    const timeSelected = this.props.selection.find(([a, _pref]) => isSameMinute(a, startTime))
     this.setState({
       selectionType: timeSelected ? 'remove' : 'add',
       selectionStart: startTime
