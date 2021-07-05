@@ -262,7 +262,7 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
     // if (selectionType === 'add') {
 
     const newSelections: [Date, number][] = newSelection.map((date) => [date, currentPreference]);
-    nextDraft = Array.from(new Set([...newSelections, ...nextDraft]));
+    nextDraft = Array.from(new Set([...newSelections, ...nextDraft.filter(([a, _pref]) => !newSelection.find((b) => !isSameMinute(a, b)))]));
 
     // } else if (selectionType === 'remove') {
     //   nextDraft = nextDraft.filter(([a, _pref]) => !newSelection.find(b => isSameMinute(a, b)))
