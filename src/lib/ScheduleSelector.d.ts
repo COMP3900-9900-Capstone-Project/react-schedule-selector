@@ -17,8 +17,15 @@ declare type PropsType = {
     unselectedColor: string;
     selectedColor: string;
     hoveredColor: string;
-    prefMappings: {
+    prefColorMappings: {
         [key: number]: string;
+    };
+    prefImgMappings: {
+        [key: number]: {
+            repeat: string;
+            data: string;
+            size: string;
+        } | null;
     };
     renderDateCell?: (datetime: Date, selected: boolean, refSetter: (dateCellElement: HTMLElement) => void) => JSX.Element;
     renderTimeLabel?: (time: Date) => JSX.Element;

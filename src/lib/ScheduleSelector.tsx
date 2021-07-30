@@ -37,12 +37,19 @@ export const GridCell = styled.div`
 const DateCell = styled.div<{
   selected: boolean
   selectedColor: string
+  selectedImg: {
+    data: string,
+    size: string,
+  } | null
   unselectedColor: string
   hoveredColor: string
 }>`
   width: 100%;
   height: 25px;
   background-color: ${props => (props.selected ? props.selectedColor : props.unselectedColor)};
+  background-image: ${props => (props.selected ? props.selectedImg?.data : null)};
+  background-repeat: ${props => (props.selected ? props.selectedImg?.repeat : null)};
+  background-size: ${props => (props.selected ? props.selectedImg?.size : null)};
 
   &:hover {
     background-color: ${props => props.hoveredColor};
@@ -82,8 +89,15 @@ type PropsType = {
   unselectedColor: string
   selectedColor: string
   hoveredColor: string
-  prefMappings: {
+  prefColorMappings: {
     [key: number]: string
+  }
+  prefImgMappings: {
+    [key: number]: {
+      repeat: string,  // fed into background-repeat
+      data: string,  // fed into background-image
+      size: string,  // fed into background-size
+    } | null
   }
   renderDateCell?: (datetime: Date, selected: boolean, refSetter: (dateCellElement: HTMLElement) => void) => JSX.Element
   renderTimeLabel?: (time: Date) => JSX.Element
@@ -365,7 +379,8 @@ export default class ScheduleSelector extends React.Component<PropsType, StateTy
         <DateCell
           selected={selected}
           ref={refSetter}
-          selectedColor={this.props.prefMappings[pref]}
+          selectedColor={this.props.prefColorMappings[pref]}
+          selectedImg={this.props.prefImgMappings[pref]}
           unselectedColor={this.props.unselectedColor}
           hoveredColor={this.props.hoveredColor}
         />
