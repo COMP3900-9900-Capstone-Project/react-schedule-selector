@@ -1,0 +1,10 @@
+#!/bin/bash
+# Usage: bin/build
+# Will rebuild the react-schedule-selector component into the
+# external directory
+SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+cd $SCRIPTPATH/..
+
+rm -rf $SCRIPTPATH/../src/external/dist
+yarn build
+cp -r dist ../src/external
